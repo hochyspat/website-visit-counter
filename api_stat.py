@@ -1,4 +1,5 @@
 from api_manager import ApiManager
+from tests.test_visit_counter import visit_counter
 
 
 def build_month_regex(month: str) -> str:
@@ -34,7 +35,8 @@ def main():
     - Вызывает методы из ApiManager для получения статистики.
     - Записывает все результаты в файл 'stats.txt'.
     """
-    api = ApiManager()
+    log_file = "visits.txt"
+    api = ApiManager(log_file)
 
     day = input("Введите день (в формате YYYY-MM-DD): ").strip()
     month_raw = input("Введите месяц (в формате YYYY-MM): ").strip()

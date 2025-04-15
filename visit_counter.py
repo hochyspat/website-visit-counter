@@ -13,7 +13,7 @@ class VisitCounter:
 
     def __init__(self) -> None:
         self.load_manager = LoadManager("visits.txt")
-        self.api_manager = ApiManager()
+        self.api_manager = ApiManager("visits.txt")
 
     def save_log(self, client_ip: str, access_date: str) -> None:
         """

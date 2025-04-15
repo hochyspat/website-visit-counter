@@ -8,8 +8,8 @@ class ApiManager:
     Класс для получения статистики посещений.
     """
 
-    def __init__(self) -> None:
-        self._load_manager = LoadManager("visits.txt")
+    def __init__(self, log_file_name: str) -> None:
+        self._load_manager = LoadManager(log_file_name)
 
     def api_visits_filter_by_date(self, date: str) -> int:
         """

@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import patch
 from api_manager import ApiManager
 
 @pytest.fixture
@@ -14,9 +14,11 @@ def mock_logs():
 
 @pytest.fixture
 def api_manager(mock_logs):
-    api = ApiManager()
-    api._load_manager.load_logs = MagicMock(return_value=mock_logs)
-    return api
+    with patch("api_manager.LoadManager") as MockLoadManager:
+        mock_loader_instance = MockLoadManager.return_value
+        mock_loader_instance.load_logs.return_value = mock_logs
+        api = ApiManager("fake_file.txt")
+        return api
 
 def test_total_visits(api_manager):
     assert api_manager.api_visits_all() == 5

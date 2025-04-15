@@ -4,7 +4,7 @@ class LoadManager:
     """
 
     def __init__(self, log_file_name: str) -> None:
-        self.log_file = log_file_name
+        self._log_file = log_file_name
 
     def save_log(self, client_ip: str, access_date: str) -> None:
         """
@@ -14,7 +14,7 @@ class LoadManager:
             access_date (str): Дата в формате YYYY-MM-DD.
         """
 
-        with open(self.log_file, "a", encoding="utf-8") as f:
+        with open(self._log_file, "a", encoding="utf-8") as f:
             f.write(f"{client_ip} {access_date}\n")
 
     def load_logs(self) -> list[tuple[str, str]]:
@@ -24,7 +24,7 @@ class LoadManager:
             List[Tuple[str, str]]: Список кортежей (IP, дата).
         """
 
-        with open(self.log_file, "r", encoding="utf-8") as f:
+        with open(self._log_file, "r", encoding="utf-8") as f:
             line = f.readline()
             visits = []
             while line:

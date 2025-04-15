@@ -16,8 +16,8 @@ def visit_counter():
     return VisitCounter()
 
 
-@patch("VisitCounter.VisitCounter.save_log")
-@patch("VisitCounter.ApiManager.api_visits_all", return_value=11)
+@patch("visit_counter.VisitCounter.save_log")
+@patch("visit_counter.ApiManager.api_visits_all", return_value=11)
 @pytest.mark.asyncio
 async def test_handle_request(mock_api_visits_all, mock_save_log, visit_counter, mock_request):
     response = await visit_counter.handle(mock_request)
