@@ -2,7 +2,7 @@ import sys
 
 from aiohttp import web
 
-from VisitCounter import VisitCounter
+from visit_counter import VisitCounter
 
 
 def main():

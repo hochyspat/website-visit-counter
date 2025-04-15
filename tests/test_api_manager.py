@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock
-from ApiManager import ApiManager
+from api_manager import ApiManager
 
 @pytest.fixture
 def mock_logs():
@@ -15,7 +15,7 @@ def mock_logs():
 @pytest.fixture
 def api_manager(mock_logs):
     api = ApiManager()
-    api.load_manager.load_logs = MagicMock(return_value=mock_logs)
+    api._load_manager.load_logs = MagicMock(return_value=mock_logs)
     return api
 
 def test_total_visits(api_manager):

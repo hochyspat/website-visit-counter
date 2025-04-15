@@ -1,6 +1,6 @@
 import re
 
-from LoadManager import LoadManager
+from load_manager import LoadManager
 
 
 class ApiManager:
@@ -9,8 +9,7 @@ class ApiManager:
     """
 
     def __init__(self) -> None:
-        self.log_file = "visits.txt"
-        self.load_manager = LoadManager()
+        self._load_manager = LoadManager("visits.txt")
 
     def api_visits_filter_by_date(self, date: str) -> int:
         """
@@ -20,7 +19,7 @@ class ApiManager:
         Возвращает:
             int: Количество совпадений.
         """
-        logs = self.load_manager.load_logs()
+        logs = self._load_manager.load_logs()
 
         pattern = re.compile(date)
         matches = [t for t in logs if pattern.match(t[1])]
@@ -45,7 +44,7 @@ class ApiManager:
     def api_visits_all(self) -> int:
         """Возвращает общее количество посещений."""
 
-        logs = self.load_manager.load_logs()
+        logs = self._load_manager.load_logs()
         return len(logs)
 
     def api_uniq_visits_filter(self, ip: str, date: str) -> int:
@@ -57,7 +56,7 @@ class ApiManager:
             Возвращает:
                 int: Количество уникальных совпадений.
         """
-        logs = self.load_manager.load_logs()
+        logs = self._load_manager.load_logs()
 
         pattern_date = re.compile(date)
         pattern_ip = re.compile(ip)

@@ -2,8 +2,8 @@ from datetime import datetime
 
 from aiohttp import web
 
-from ApiManager import ApiManager
-from LoadManager import LoadManager
+from api_manager import ApiManager
+from load_manager import LoadManager
 
 
 class VisitCounter:
@@ -12,7 +12,7 @@ class VisitCounter:
     """
 
     def __init__(self) -> None:
-        self.load_manager = LoadManager()
+        self.load_manager = LoadManager("visits.txt")
         self.api_manager = ApiManager()
 
     def save_log(self, client_ip: str, access_date: str) -> None:

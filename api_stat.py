@@ -1,4 +1,4 @@
-from ApiManager import ApiManager
+from api_manager import ApiManager
 
 
 def build_month_regex(month: str) -> str:

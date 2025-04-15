@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from aiohttp import web
-from VisitCounter import VisitCounter
+from visit_counter import VisitCounter
 
 
 @pytest.fixture

@@ -1,13 +1,10 @@
-from typing import List, Tuple
-
-
 class LoadManager:
     """
     Класс для чтения и записи логов посещений.
     """
 
-    def __init__(self) -> None:
-        self.log_file = "visits.txt"
+    def __init__(self, log_file_name: str) -> None:
+        self.log_file = log_file_name
 
     def save_log(self, client_ip: str, access_date: str) -> None:
         """
@@ -20,7 +17,7 @@ class LoadManager:
         with open(self.log_file, "a", encoding="utf-8") as f:
             f.write(f"{client_ip} {access_date}\n")
 
-    def load_logs(self) -> List[Tuple[str, str]]:
+    def load_logs(self) -> list[tuple[str, str]]:
         """
         Загружает все строки из файла логов.
         Возвращает:
