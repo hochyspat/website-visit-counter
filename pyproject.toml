@@ -10,6 +10,7 @@ packages = [{ include = "VisitCounter" }]
 python = ">=3.12,<3.13"
 aiohttp = "^3.8.0"
 pydantic = "^2.11.3"
+flake8-pyproject = "^1.2.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2"
@@ -20,15 +21,6 @@ isort = "^5.10"
 pytest-mock = "^3.14.0"
 pytest-asyncio = "^0.26.0"
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.mypy]
-plugins = ["pydantic.mypy"]
-python_version = "3.12"
-exclude = 'venv'
-
 [tool.flake8]
 exclude = [
     ".venv",
@@ -37,8 +29,16 @@ exclude = [
     "build",
     "dist"
 ]
-max-line-length = 88
+max-line-length = 120
 
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+python_version = "3.12"
+exclude = 'venv'
 enable_error_code = ["truthy-bool", "ignore-without-code"]
 check_untyped_defs = true
 strict_optional = true

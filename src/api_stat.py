@@ -1,5 +1,4 @@
-from api_manager import ApiManager
-from tests.test_visit_counter import visit_counter
+from src.api_manager import ApiManager
 
 
 def build_month_regex(month: str) -> str:
@@ -35,7 +34,7 @@ def main():
     - Вызывает методы из ApiManager для получения статистики.
     - Записывает все результаты в файл 'stats.txt'.
     """
-    log_file = "visits.txt"
+    log_file = "../visits.txt"
     api = ApiManager(log_file)
 
     day = input("Введите день (в формате YYYY-MM-DD): ").strip()
@@ -57,7 +56,7 @@ def main():
         f"Уникальных за год ({year_raw}) по IP {ip}: {api.api_uniq_visits_year(ip, year_regex)}",
     ]
 
-    with open("stats.txt", "w", encoding="utf-8") as f:
+    with open("../stats.txt", "w", encoding="utf-8") as f:
         f.write("\n".join(stats))
 
     print("Все данные записаны в stats.txt")

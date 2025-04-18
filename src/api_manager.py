@@ -1,6 +1,6 @@
 import re
 
-from load_manager import LoadManager
+from src.load_manager import LoadManager
 
 
 class ApiManager:
@@ -81,7 +81,9 @@ class ApiManager:
 
         return self.api_uniq_visits_filter(ip, year)
 
-    def api_uniq_visits_all(self, ip: str, date: str = r"^\d{4}-\d{2}-\d{2}$") -> int:
+    def api_uniq_visits_all(self,
+                            ip: str,
+                            date: str = r"^\d{4}-\d{2}-\d{2}$") -> int:
         """Возвращает количество всех уникальных посещений по IP."""
 
         return self.api_uniq_visits_filter(ip, date)

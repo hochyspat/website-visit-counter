@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from api_manager import ApiManager
+from src.api_manager import ApiManager
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def mock_logs():
 
 @pytest.fixture
 def api_manager(mock_logs):
-    with patch("api_manager.LoadManager") as MockLoadManager:
+    with patch("src.api_manager.LoadManager") as MockLoadManager:
         mock_loader_instance = MockLoadManager.return_value
         mock_loader_instance.load_logs.return_value = mock_logs
         api = ApiManager("fake_file.txt")
