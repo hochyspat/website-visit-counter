@@ -1,6 +1,8 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 from aiohttp import web
+
 from visit_counter import VisitCounter
 
 
@@ -19,7 +21,9 @@ def visit_counter():
 @patch("visit_counter.VisitCounter.save_log")
 @patch("visit_counter.ApiManager.api_visits_all", return_value=11)
 @pytest.mark.asyncio
-async def test_handle_request(mock_api_visits_all, mock_save_log, visit_counter, mock_request):
+async def test_handle_request(
+    mock_api_visits_all, mock_save_log, visit_counter, mock_request
+):
     response = await visit_counter.handle(mock_request)
 
     mock_save_log.assert_called_once()

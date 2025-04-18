@@ -27,6 +27,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.mypy]
 plugins = ["pydantic.mypy"]
 python_version = "3.12"
+exclude = 'venv'
 
 [tool.flake8]
 exclude = [

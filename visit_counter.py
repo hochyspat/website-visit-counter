@@ -15,7 +15,7 @@ class VisitCounter:
         self.load_manager = LoadManager("visits.txt")
         self.api_manager = ApiManager("visits.txt")
 
-    def save_log(self, client_ip: str, access_date: str) -> None:
+    def save_log(self, client_ip: str | None, access_date: str) -> None:
         """
         Сохраняет лог посещения.
         Принимает аргументы:
@@ -23,7 +23,8 @@ class VisitCounter:
             access_date (str): Дата в формате YYYY-MM-DD.
         """
 
-        self.load_manager.save_log(client_ip, access_date)
+        if client_ip is not None:
+            self.load_manager.save_log(client_ip, access_date)
 
     async def handle(self, request: web.Request) -> web.Response:
         """

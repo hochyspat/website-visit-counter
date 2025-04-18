@@ -6,7 +6,7 @@ class LoadManager:
     def __init__(self, log_file_name: str) -> None:
         self._log_file = log_file_name
 
-    def save_log(self, client_ip: str, access_date: str) -> None:
+    def save_log(self, client_ip: str | None, access_date: str) -> None:
         """
         Сохраняет IP и дату в файл.
         Принимает аргументы:
