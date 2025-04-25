@@ -5,15 +5,15 @@ from aiohttp import web
 from visit_counter import VisitCounter
 
 
-def main():
+def main() -> None:
     app = web.Application()
     counter = VisitCounter()
 
     app.router.add_get("/", counter.handle)
+    app.router.add_get("/image", counter.handle_image)
 
     host = input(
-        "Введите ip-адрес хоста:"
-        "(например, 127.0.0.1, 0.0.0.0, или локальный IP)"
+        "Введите ip-адрес хоста:" "(например, 127.0.0.1, 0.0.0.0, или локальный IP)"
     ).strip()
     print("сервер: http://<введенный ip>:8080")
 

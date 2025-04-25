@@ -1,3 +1,5 @@
+import re
+
 from src.api_manager import ApiManager
 
 
@@ -27,39 +29,115 @@ def build_year_regex(year: str) -> str:
     return rf"{year}-\d{{2}}-\d{{2}}"
 
 
-def main():
+def is_valid_date(date: str) -> bool:
+    """Валидация даты"""
+    return bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", date))
+
+
+def is_valid_month(month: str) -> bool:
+    """Валидация месяца"""
+    return bool(re.fullmatch(r"\d{4}-\d{2}", month))
+
+
+def is_valid_year(year: str) -> bool:
+    """Валидация года"""
+    return bool(re.fullmatch(r"\d{4}", year))
+
+
+def is_valid_ip(ip: str) -> bool:
+    """Валидация ip"""
+    return bool(re.fullmatch(r"(?:\d{1,3}\.){3}\d{1,3}", ip))
+
+
+def main() -> None:
     """
-    - Получает ввод от пользователя: день, месяц, год, IP.
-    - Преобразует введённые значения в регулярные выражения.
-    - Вызывает методы из ApiManager для получения статистики.
-    - Записывает все результаты в файл 'stats.txt'.
+    Меню для выбора статистики.
     """
     log_file = "../visits.txt"
     api = ApiManager(log_file)
 
-    day = input("Введите день (в формате YYYY-MM-DD): ").strip()
-    month_raw = input("Введите месяц (в формате YYYY-MM): ").strip()
-    year_raw = input("Введите год (в формате YYYY): ").strip()
-    ip = input("Введите IP-адрес: ").strip()
+    print("Статистики посещений")
+    print("1. Все посещения")
+    print("2. Уникальные посещения по IP")
 
-    month_regex = build_month_regex(month_raw)
-    year_regex = build_year_regex(year_raw)
+    while True:
+        stat_type = input("Выберите тип статистики (1/2): ").strip()
+        if stat_type in {"1", "2"}:
+            break
+        print("Ошибка: введите 1 или 2.")
 
-    stats = [
-        f"Общее количество посещений: {api.api_visits_all()}",
-        f"Посещений за день ({day}): {api.api_visits_day(day)}",
-        f"Посещений за месяц ({month_raw}): {api.api_visits_month(month_regex)}",
-        f"Посещений за год ({year_raw}): {api.api_visits_year(year_regex)}",
-        f"Всего уникальных посещений по IP {ip}: {api.api_uniq_visits_all(ip)}",
-        f"Уникальных за день ({day}) по IP {ip}: {api.api_uniq_visits_day(ip, day)}",
-        f"Уникальных за месяц ({month_raw}) по IP {ip}: {api.api_uniq_visits_month(ip, month_regex)}",
-        f"Уникальных за год ({year_raw}) по IP {ip}: {api.api_uniq_visits_year(ip, year_regex)}",
-    ]
+    ip = ""
+    if stat_type == "2":
+        while True:
+            ip = input("Введите IP-адрес: ").strip()
+            if is_valid_ip(ip):
+                break
+            print("Ошибка: введите корректный IP-адрес (например, 192.168.1.1).")
+
+    print("\nВыберите период:")
+    print("1. За день")
+    print("2. За месяц")
+    print("3. За год")
+    print("4. За всё время")
+
+    while True:
+        period = input("Введите номер периода (1/2/3/4): ").strip()
+        if period in {"1", "2", "3", "4"}:
+            break
+        print("Ошибка: введите число от 1 до 4.")
+
+    result = ""
+
+    if period == "1":
+        while True:
+            day = input("Введите день (в формате YYYY-MM-DD): ").strip()
+            if is_valid_date(day):
+                break
+            print("Ошибка: неверный формат. Пример: 2024-04-25")
+        result = (
+            f"Посещений за день ({day}): {api.api_visits_day(day)}"
+            if stat_type == "1"
+            else f"Уникальных посещений за день ({day}) по IP {ip}: {api.api_uniq_visits_day(ip, day)}"
+        )
+
+    elif period == "2":
+        while True:
+            month = input("Введите месяц (в формате YYYY-MM): ").strip()
+            if is_valid_month(month):
+                break
+            print("Ошибка: неверный формат. Пример: 2024-04")
+        month_regex = build_month_regex(month)
+        result = (
+            f"Посещений за месяц ({month}): {api.api_visits_month(month_regex)}"
+            if stat_type == "1"
+            else f"Уникальных посещений за месяц ({month}) по IP {ip}: "
+            f"{api.api_uniq_visits_month(ip, month_regex)}"
+        )
+
+    elif period == "3":
+        while True:
+            year = input("Введите год (в формате YYYY): ").strip()
+            if is_valid_year(year):
+                break
+            print("Ошибка: неверный формат. Пример: 2024")
+        year_regex = build_year_regex(year)
+        result = (
+            f"Посещений за год ({year}): {api.api_visits_year(year_regex)}"
+            if stat_type == "1"
+            else f"Уникальных посещений за год ({year}) по IP {ip}: {api.api_uniq_visits_year(ip, year_regex)}"
+        )
+
+    elif period == "4":
+        result = (
+            f"Общее количество посещений: {api.api_visits_all()}"
+            if stat_type == "1"
+            else f"Всего уникальных посещений по IP {ip}: {api.api_uniq_visits_all(ip)}"
+        )
 
     with open("../stats.txt", "w", encoding="utf-8") as f:
-        f.write("\n".join(stats))
+        f.write(result + "\n")
 
-    print("Все данные записаны в stats.txt")
+    print("Результат записан в файл stats.txt")
 
 
 if __name__ == "__main__":
