@@ -1,5 +1,4 @@
 import re
-
 from src.api_manager import ApiManager
 
 
@@ -28,7 +27,6 @@ def build_year_regex(year: str) -> str:
     """
     return rf"{year}-\d{{2}}-\d{{2}}"
 
-
 def is_valid_date(date: str) -> bool:
     """Валидация даты"""
     return bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", date))
@@ -55,7 +53,7 @@ def main() -> None:
     """
     log_file = "../visits.txt"
     api = ApiManager(log_file)
-
+    
     print("Статистики посещений")
     print("1. Все посещения")
     print("2. Уникальные посещения по IP")
