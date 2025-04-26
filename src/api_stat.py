@@ -1,9 +1,17 @@
 import re
-from typing import Callable
+from typing import Callable, Final, Mapping, NamedTuple
 
 from src.api_manager import ApiManager
 from src.stat_period import StatPeriod
 from src.stat_type import StatType
+
+
+class InputSetting(NamedTuple):
+    prompt: str
+    validator: Callable[[str], bool]
+    example: str
+    all_visits_func: Callable[[str], int]
+    uniq_visits_func: Callable[[str, str], int]
 
 
 def build_month_regex(month: str) -> str:
@@ -71,7 +79,7 @@ def stat_period_select() -> StatPeriod:
 
 
 def input_with_validation(
-    prompt: str, validation_func: Callable[[str], bool], error_example: str
+        prompt: str, validation_func: Callable[[str], bool], error_example: str
 ) -> str:
     """Метод для корректного ввода параметров"""
     while True:
@@ -81,13 +89,37 @@ def input_with_validation(
         print(f"Ошибка: неверный формат. Пример: {error_example}")
 
 
+log_file = "../visits.txt"
+api = ApiManager(log_file)
+INPUT_SETTINGS: Final[Mapping[StatPeriod, InputSetting]] = {
+    StatPeriod.DAY_STAT: InputSetting(
+        "Введите день (в формате YYYY-MM-DD): ",
+        is_valid_date,
+        "2024-04-25",
+        api.api_visits_day,
+        api.api_uniq_visits_day,
+    ),
+    StatPeriod.MONTH_STAT: InputSetting(
+        "Введите месяц (в формате YYYY-MM): ",
+        is_valid_month,
+        "2024-04",
+        api.api_visits_month,
+        api.api_uniq_visits_month,
+    ),
+    StatPeriod.YEAR_STAT: InputSetting(
+        "Введите год (в формате YYYY): ",
+        is_valid_year,
+        "2024",
+        api.api_visits_year,
+        api.api_uniq_visits_year,
+    ),
+}
+
+
 def main() -> None:
     """
     Меню для выбора статистики.
     """
-    log_file = "../visits.txt"
-    api = ApiManager(log_file)
-
     print("Статистики посещений")
     print("1. Все посещения")
     print("2. Уникальные посещения по IP")
@@ -105,39 +137,6 @@ def main() -> None:
 
     period = stat_period_select()
 
-    input_settings: dict[
-        StatPeriod,
-        tuple[
-            str,
-            Callable[[str], bool],
-            str,
-            Callable[[str], int],
-            Callable[[str, str], int],
-        ],
-    ] = {
-        StatPeriod.DAY_STAT: (
-            "Введите день (в формате YYYY-MM-DD): ",
-            is_valid_date,
-            "2024-04-25",
-            api.api_visits_day,
-            api.api_uniq_visits_day,
-        ),
-        StatPeriod.MONTH_STAT: (
-            "Введите месяц (в формате YYYY-MM): ",
-            is_valid_month,
-            "2024-04",
-            api.api_visits_month,
-            api.api_uniq_visits_month,
-        ),
-        StatPeriod.YEAR_STAT: (
-            "Введите год (в формате YYYY): ",
-            is_valid_year,
-            "2024",
-            api.api_visits_year,
-            api.api_uniq_visits_year,
-        ),
-    }
-
     match period:
         case StatPeriod.ALL_TIME_STAT:
             result = (
@@ -152,7 +151,7 @@ def main() -> None:
                 example,
                 all_visits_func,
                 uniq_visits_func,
-            ) = input_settings[period]
+            ) = INPUT_SETTINGS[period]
             value = input_with_validation(prompt, validator, example)
 
             if period == StatPeriod.MONTH_STAT:
