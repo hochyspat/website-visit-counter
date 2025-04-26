@@ -1,5 +1,5 @@
-import os
 from io import BytesIO
+from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -14,8 +14,9 @@ class ImageGenerator:
         Инициализация генератора изображения.
         Загружает шрифт и картинку.
         """
+        current_dir = Path(__file__).resolve().parent
         self.font: ImageFont.FreeTypeFont = ImageFont.truetype("arial.ttf", 40)
-        img_path: str = os.path.join(os.path.dirname(__file__), "hello.png")
+        img_path = current_dir / "hello.png"
         self.hello_image: Image.Image = Image.open(img_path).convert("RGBA")
 
     def generate_image(self, number: int) -> bytes:

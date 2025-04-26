@@ -1,5 +1,9 @@
 import re
+from typing import Callable
+
 from src.api_manager import ApiManager
+from src.stat_period import StatPeriod
+from src.stat_type import StatType
 
 
 def build_month_regex(month: str) -> str:
@@ -27,6 +31,7 @@ def build_year_regex(year: str) -> str:
     """
     return rf"{year}-\d{{2}}-\d{{2}}"
 
+
 def is_valid_date(date: str) -> bool:
     """Валидация даты"""
     return bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", date))
@@ -47,30 +52,50 @@ def is_valid_ip(ip: str) -> bool:
     return bool(re.fullmatch(r"(?:\d{1,3}\.){3}\d{1,3}", ip))
 
 
+def stat_type_select() -> StatType:
+    """Выбор типа статистики"""
+    while True:
+        stat_type: str = input("Выберите тип статистики (1/2): ").strip()
+        if stat_type in (stat.value for stat in StatType):
+            return StatType(stat_type)
+        print("Ошибка: введите 1 или 2.")
+
+
+def stat_period_select() -> StatPeriod:
+    """Выбор периода для создания статистики"""
+    while True:
+        period: str = input("Введите номер периода (1/2/3/4): ").strip()
+        if period in (stat.value for stat in StatPeriod):
+            return StatPeriod(period)
+        print("Ошибка: введите число от 1 до 4.")
+
+
+def input_with_validation(
+    prompt: str, validation_func: Callable[[str], bool], error_example: str
+) -> str:
+    """Метод для корректного ввода параметров"""
+    while True:
+        user_input = input(prompt).strip()
+        if validation_func(user_input):
+            return user_input
+        print(f"Ошибка: неверный формат. Пример: {error_example}")
+
+
 def main() -> None:
     """
     Меню для выбора статистики.
     """
     log_file = "../visits.txt"
     api = ApiManager(log_file)
-    
+
     print("Статистики посещений")
     print("1. Все посещения")
     print("2. Уникальные посещения по IP")
-
-    while True:
-        stat_type = input("Выберите тип статистики (1/2): ").strip()
-        if stat_type in {"1", "2"}:
-            break
-        print("Ошибка: введите 1 или 2.")
+    stat_type = stat_type_select()
 
     ip = ""
-    if stat_type == "2":
-        while True:
-            ip = input("Введите IP-адрес: ").strip()
-            if is_valid_ip(ip):
-                break
-            print("Ошибка: введите корректный IP-адрес (например, 192.168.1.1).")
+    if stat_type == StatType.UNIQUE_VISITS:
+        ip = input_with_validation("Введите IP-адрес: ", is_valid_ip, "192.168.1.1")
 
     print("\nВыберите период:")
     print("1. За день")
@@ -78,59 +103,68 @@ def main() -> None:
     print("3. За год")
     print("4. За всё время")
 
-    while True:
-        period = input("Введите номер периода (1/2/3/4): ").strip()
-        if period in {"1", "2", "3", "4"}:
-            break
-        print("Ошибка: введите число от 1 до 4.")
+    period = stat_period_select()
 
-    result = ""
+    input_settings: dict[
+        StatPeriod,
+        tuple[
+            str,
+            Callable[[str], bool],
+            str,
+            Callable[[str], int],
+            Callable[[str, str], int],
+        ],
+    ] = {
+        StatPeriod.DAY_STAT: (
+            "Введите день (в формате YYYY-MM-DD): ",
+            is_valid_date,
+            "2024-04-25",
+            api.api_visits_day,
+            api.api_uniq_visits_day,
+        ),
+        StatPeriod.MONTH_STAT: (
+            "Введите месяц (в формате YYYY-MM): ",
+            is_valid_month,
+            "2024-04",
+            api.api_visits_month,
+            api.api_uniq_visits_month,
+        ),
+        StatPeriod.YEAR_STAT: (
+            "Введите год (в формате YYYY): ",
+            is_valid_year,
+            "2024",
+            api.api_visits_year,
+            api.api_uniq_visits_year,
+        ),
+    }
 
-    if period == "1":
-        while True:
-            day = input("Введите день (в формате YYYY-MM-DD): ").strip()
-            if is_valid_date(day):
-                break
-            print("Ошибка: неверный формат. Пример: 2024-04-25")
-        result = (
-            f"Посещений за день ({day}): {api.api_visits_day(day)}"
-            if stat_type == "1"
-            else f"Уникальных посещений за день ({day}) по IP {ip}: {api.api_uniq_visits_day(ip, day)}"
-        )
+    match period:
+        case StatPeriod.ALL_TIME_STAT:
+            result = (
+                f"Общее количество посещений: {api.api_visits_all()}"
+                if stat_type == StatType.ALL_VISITS
+                else f"Всего уникальных посещений по IP {ip}: {api.api_uniq_visits_all(ip)}"
+            )
+        case _:
+            (
+                prompt,
+                validator,
+                example,
+                all_visits_func,
+                uniq_visits_func,
+            ) = input_settings[period]
+            value = input_with_validation(prompt, validator, example)
 
-    elif period == "2":
-        while True:
-            month = input("Введите месяц (в формате YYYY-MM): ").strip()
-            if is_valid_month(month):
-                break
-            print("Ошибка: неверный формат. Пример: 2024-04")
-        month_regex = build_month_regex(month)
-        result = (
-            f"Посещений за месяц ({month}): {api.api_visits_month(month_regex)}"
-            if stat_type == "1"
-            else f"Уникальных посещений за месяц ({month}) по IP {ip}: "
-            f"{api.api_uniq_visits_month(ip, month_regex)}"
-        )
+            if period == StatPeriod.MONTH_STAT:
+                value = build_month_regex(value)
+            elif period == StatPeriod.YEAR_STAT:
+                value = build_year_regex(value)
 
-    elif period == "3":
-        while True:
-            year = input("Введите год (в формате YYYY): ").strip()
-            if is_valid_year(year):
-                break
-            print("Ошибка: неверный формат. Пример: 2024")
-        year_regex = build_year_regex(year)
-        result = (
-            f"Посещений за год ({year}): {api.api_visits_year(year_regex)}"
-            if stat_type == "1"
-            else f"Уникальных посещений за год ({year}) по IP {ip}: {api.api_uniq_visits_year(ip, year_regex)}"
-        )
-
-    elif period == "4":
-        result = (
-            f"Общее количество посещений: {api.api_visits_all()}"
-            if stat_type == "1"
-            else f"Всего уникальных посещений по IP {ip}: {api.api_uniq_visits_all(ip)}"
-        )
+            result = (
+                f"Посещений за период: {all_visits_func(value)}"
+                if stat_type == StatType.ALL_VISITS
+                else f"Уникальных посещений за период по IP {ip}: {uniq_visits_func(ip, value)}"
+            )
 
     with open("../stats.txt", "w", encoding="utf-8") as f:
         f.write(result + "\n")

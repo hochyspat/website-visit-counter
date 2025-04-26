@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 
 from aiohttp import web
 
@@ -31,37 +32,16 @@ class VisitCounter:
     async def handle(self, request: web.Request) -> web.Response:
         """
         Обрабатывает входящий HTTP-запрос и возвращает количество посещений.
-        Принимает аргументы:
-            request (web.Request): HTTP-запрос.
-        Возвращает:
-            web.Response: HTTP-ответ с количеством посещений.
         """
-
         client_ip = request.remote
         access_date = datetime.now().strftime("%Y-%m-%d")
 
         self.save_log(client_ip, access_date)
 
-        html = """
-        <html>
-        <head>
-            <style>
-                body {
-                    background-color: #ffffff;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                    margin: 0;
-                    font-family: sans-serif;
-                }
-            </style>
-        </head>
-        <body>
-            <img src="/image" alt="Visit Image">
-        </body>
-        </html>
-        """
+        current_dir = Path(__file__).resolve().parent
+        template_path = current_dir / "vizual.html"
+        html = template_path.read_text(encoding="utf-8")
+
         return web.Response(text=html, content_type="text/html")
 
     async def handle_image(self, request: web.Request) -> web.Response:
